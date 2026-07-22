@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>OVERWATCH // Facility Control Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="overwatch-interface.css">
+</head>
+<body>
+
+<!-- ============ SCANLINE / GRAIN OVERLAY ============ -->
+<div class="crt-overlay" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ============ BOOT SEQUENCE ============ -->
+<section id="boot-sequence" class="screen boot-screen" aria-label="System boot sequence">
+  <div class="boot-inner">
+    <div class="boot-logo">
+      <svg viewBox="0 0 100 100" class="boot-ring">
+        <circle cx="50" cy="50" r="42" class="boot-ring-track"/>
+        <circle cx="50" cy="50" r="42" class="boot-ring-progress"/>
+      </svg>
+      <div class="boot-glyph">OW</div>
+    </div>
+    <div class="boot-lines" id="boot-lines"></div>
+    <div class="boot-percent"><span id="boot-percent-num">0</span>%</div>
+  </div>
+</section>
+
+<!-- ============ MAIN MENU ============ -->
+<section id="main-menu" class="screen menu-screen hidden" aria-label="Main menu">
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="menu-topbar">
+    <div class="brand">
+      <span class="brand-mark">◈</span>
+      <span class="brand-name">OVERWATCH</span>
+      <span class="brand-sub">FACILITY CONTROL SYSTEM // BUILD 7.4.1</span>
+    </div>
+    <div class="operator-chip" id="operator-chip">
+      <span class="chip-label">OPERATOR</span>
+      <span class="chip-value" id="operator-callsign">UNASSIGNED</span>
+    </div>
+  </header>
+
+  <div class="menu-center">
+    <h1 class="menu-title">
+      <span class="menu-title-line">TAKE THE</span>
+      <span class="menu-title-line menu-title-accent">CONSOLE</span>
+    </h1>
+    <p class="menu-tagline">Five systems. One operator. Nothing fails on your watch.</p>
+
+    <nav class="menu-actions" aria-label="Primary actions">
+      <button class="btn btn-primary" id="btn-new-shift" data-action="new-shift">
+        <span class="btn-icon">▶</span> Begin Shift
+        <span class="btn-underline"></span>
+      </button>
+      <button class="btn btn-secondary" id="btn-continue" data-action="continue" disabled>
+        <span class="btn-icon">↻</span> Resume Shift
+      </button>
+      <button class="btn btn-ghost" data-action="how-to-play">
+        <span class="btn-icon">?</span> Operations Manual
+      </button>
+      <button class="btn btn-ghost" data-action="achievements">
+        <span class="btn-icon">★</span> Commendations
+      </button>
+      <button class="btn btn-ghost" data-action="settings">
+        <span class="btn-icon">⚙</span> Terminal Settings
+      </button>
+    </nav>
+  </div>
+
+  <footer class="menu-footer">
+    <div class="footer-stats">
+      <div class="footer-stat"><span class="fs-label">Clearance</span><span class="fs-value" id="stat-clearance">LEVEL 1</span></div>
+      <div class="footer-stat"><span class="fs-label">Best Score</span><span class="fs-value" id="stat-bestscore">000000</span></div>
+      <div class="footer-stat"><span class="fs-label">Shifts Logged</span><span class="fs-value" id="stat-shifts">0</span></div>
+      <div class="footer-stat"><span class="fs-label">Commendations</span><span class="fs-value" id="stat-achv">0 / 12</span></div>
+    </div>
+    <div class="footer-legal">SECURE LOCAL SESSION — NO EXTERNAL UPLINK — <span id="clock-readout">00:00:00</span></div>
+  </footer>
+</section>
+
+<!-- ============ HOW TO PLAY MODAL ============ -->
+<div id="modal-howto" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+  <div class="modal-panel modal-wide">
+    <div class="modal-header">
+      <h2 id="howto-title">Operations Manual</h2>
+      <button class="modal-close" data-close="modal-howto" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body howto-body">
+      <div class="howto-grid">
+        <div class="howto-card">
+          <div class="howto-card-num">01</div>
+          <h3>Watch the Grid</h3>
+          <p>Five stations keep the facility alive: Power, Security, Comms, Life Support and the Data Core. Each has an integrity meter. Left unattended, incidents drain it toward zero.</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-card-num">02</div>
+          <h3>Read the Incident</h3>
+          <p>When a station flags an incident, select it. If the type is unknown, run a <strong>Scan</strong> to reveal it — free, but it costs precious seconds.</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-card-num">03</div>
+          <h3>Choose the Response</h3>
+          <p>Four responses are available: <strong>Stabilize</strong>, <strong>Reroute</strong>, <strong>Purge</strong>, and <strong>Lockdown</strong>. Each counters specific incident types. The wrong call costs Focus and integrity.</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-card-num">04</div>
+          <h3>Spend Focus Wisely</h3>
+          <p>Every action costs Focus Points, which regenerate slowly. Running dry leaves you unable to respond — manage your reserve like ammunition.</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-card-num">05</div>
+          <h3>Clear Directives</h3>
+          <p>Each shift hands you live directives — hold thresholds, clear incidents cleanly, survive spikes. Clearing all directives closes the shift and raises your clearance.</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-card-num">06</div>
+          <h3>Don't Lose the Facility</h3>
+          <p>If overall facility integrity collapses to zero, the shift ends in a meltdown. Chain clean resolutions to build your multiplier and post a better score.</p>
+        </div>
+      </div>
+      <div class="howto-keys">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="key-row"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd><span>Select station</span></div>
+        <div class="key-row"><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd><span>Stabilize / Reroute / Purge / Lockdown</span></div>
+        <div class="key-row"><kbd>SPACE</kbd><span>Scan selected station</span></div>
+        <div class="key-row"><kbd>ESC</kbd><span>Pause shift</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ACHIEVEMENTS MODAL ============ -->
+<div id="modal-achievements" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="achv-title">
+  <div class="modal-panel modal-wide">
+    <div class="modal-header">
+      <h2 id="achv-title">Commendations</h2>
+      <button class="modal-close" data-close="modal-achievements" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="achv-grid" id="achv-grid"><!-- populated by JS --></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div id="modal-settings" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2 id="settings-title">Terminal Settings</h2>
+      <button class="modal-close" data-close="modal-settings" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body settings-body">
+      <div class="setting-row">
+        <div class="setting-label">
+          <span>Audio Feedback</span>
+          <span class="setting-desc">Synthesized console tones for alerts and actions</span>
+        </div>
+        <button class="toggle" id="toggle-audio" data-on="true" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">
+          <span>Screen Effects</span>
+          <span class="setting-desc">CRT scanlines and ambient screen glow</span>
+        </div>
+        <button class="toggle" id="toggle-crt" data-on="true" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">
+          <span>Reduced Motion</span>
+          <span class="setting-desc">Minimizes ambient animation across the interface</span>
+        </div>
+        <button class="toggle" id="toggle-motion" data-on="false" role="switch" aria-checked="false"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">
+          <span>Master Volume</span>
+          <span class="setting-desc">Overall level for console tones</span>
+        </div>
+        <input type="range" id="range-volume" min="0" max="100" value="55" class="slider" aria-label="Master volume">
+      </div>
+      <div class="setting-footer">
+        <button class="btn btn-ghost btn-danger" id="btn-reset-progress">Reset All Progress</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIFFICULTY / BRIEFING SCREEN ============ -->
+<section id="briefing-screen" class="screen briefing-screen hidden" aria-label="Mission briefing">
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="briefing-inner">
+    <div class="briefing-head">
+      <span class="eyebrow">INCOMING TRANSMISSION</span>
+      <h2 id="briefing-title">Shift Directive</h2>
+    </div>
+
+    <div class="briefing-columns">
+      <div class="briefing-col">
+        <h3 class="briefing-sub">Select Clearance Difficulty</h3>
+        <div class="diff-cards" id="diff-cards">
+          <button class="diff-card" data-difficulty="standard">
+            <span class="diff-name">STANDARD</span>
+            <span class="diff-desc">Baseline incident tempo. Recommended for new operators.</span>
+            <span class="diff-meta">Incident rate ×1.0 · Focus regen ×1.0</span>
+          </button>
+          <button class="diff-card" data-difficulty="elevated">
+            <span class="diff-name">ELEVATED</span>
+            <span class="diff-desc">Faster escalation, tighter margins.</span>
+            <span class="diff-meta">Incident rate ×1.35 · Focus regen ×0.85</span>
+          </button>
+          <button class="diff-card" data-difficulty="critical">
+            <span class="diff-name">CRITICAL</span>
+            <span class="diff-desc">Cascading failures. For operators who trust their reflexes.</span>
+            <span class="diff-meta">Incident rate ×1.75 · Focus regen ×0.7</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="briefing-col">
+        <h3 class="briefing-sub">This Shift's Directives</h3>
+        <ul class="briefing-objectives" id="briefing-objectives"><!-- populated by JS --></ul>
+        <div class="briefing-note">
+          <p>Clearance <span id="briefing-clearance">1</span> facility. Directives escalate with your standing. Complete every directive before the shift clock runs out to advance clearance.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="briefing-actions">
+      <button class="btn btn-ghost" data-action="back-to-menu">← Stand Down</button>
+      <button class="btn btn-primary" id="btn-launch-shift" data-action="launch-shift" disabled>
+        <span class="btn-icon">▶</span> Take the Console
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GAME SCREEN ============ -->
+<section id="game-screen" class="screen game-screen hidden" aria-label="Facility control console">
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="hud-topbar">
+    <div class="hud-cluster">
+      <div class="hud-metric">
+        <span class="hud-metric-label">SCORE</span>
+        <span class="hud-metric-value" id="hud-score">0</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric-label">COMBO</span>
+        <span class="hud-metric-value" id="hud-combo">×1.0</span>
+      </div>
+      <div class="hud-metric">
+        <span class="hud-metric-label">CLEARANCE</span>
+        <span class="hud-metric-value" id="hud-clearance">1</span>
+      </div>
+    </div>
+
+    <div class="hud-center">
+      <span class="hud-shift-name" id="hud-shift-name">STANDARD SHIFT</span>
+      <span class="hud-timer" id="hud-timer">00:00</span>
+    </div>
+
+    <div class="hud-cluster hud-cluster-right">
+      <button class="icon-btn" data-action="open-settings-ingame" aria-label="Settings">⚙</button>
+      <button class="icon-btn" data-action="pause-game" aria-label="Pause">❚❚</button>
+    </div>
+  </header>
+
+  <div class="console-body">
+
+    <!-- LEFT: Station Grid -->
+    <div class="panel stations-panel">
+      <div class="panel-title"><span>FACILITY STATIONS</span></div>
+      <div class="station-grid" id="station-grid"><!-- populated by JS --></div>
+    </div>
+
+    <!-- CENTER: Integrity Ring + Log -->
+    <div class="panel center-panel">
+      <div class="integrity-ring-wrap">
+        <svg viewBox="0 0 200 200" class="integrity-ring">
+          <circle cx="100" cy="100" r="88" class="ring-track"/>
+          <circle cx="100" cy="100" r="88" class="ring-progress" id="ring-progress"/>
+          <circle cx="100" cy="100" r="88" class="ring-sweep" id="ring-sweep"/>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-value" id="ring-value">100</span>
+          <span class="ring-unit">FACILITY</span>
+        </div>
+      </div>
+
+      <div class="focus-meter-wrap">
+        <div class="focus-label"><span>FOCUS</span><span id="focus-value">100/100</span></div>
+        <div class="focus-bar"><div class="focus-bar-fill" id="focus-bar-fill"></div></div>
+      </div>
+
+      <div class="command-log-wrap">
+        <div class="panel-title"><span>COMMAND LOG</span></div>
+        <div class="command-log" id="command-log"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Objectives + Actions -->
+    <div class="panel right-panel">
+      <div class="objectives-block">
+        <div class="panel-title"><span>ACTIVE DIRECTIVES</span></div>
+        <ul class="objectives-list" id="objectives-list"></ul>
+      </div>
+
+      <div class="action-block">
+        <div class="panel-title"><span>SELECTED STATION</span></div>
+        <div class="selected-station-readout" id="selected-readout">
+          <span class="ssr-empty">No station selected</span>
+        </div>
+        <div class="action-grid">
+          <button class="action-btn" data-action-key="scan" data-key="SPACE">
+            <span class="action-key">SPACE</span><span class="action-name">Scan</span>
+          </button>
+          <button class="action-btn" data-action-key="stabilize" data-key="Q">
+            <span class="action-key">Q</span><span class="action-name">Stabilize</span>
+          </button>
+          <button class="action-btn" data-action-key="reroute" data-key="W">
+            <span class="action-key">W</span><span class="action-name">Reroute</span>
+          </button>
+          <button class="action-btn" data-action-key="purge" data-key="E">
+            <span class="action-key">E</span><span class="action-name">Purge</span>
+          </button>
+          <button class="action-btn" data-action-key="lockdown" data-key="R">
+            <span class="action-key">R</span><span class="action-name">Lockdown</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast / notification layer -->
+  <div class="toast-layer" id="toast-layer"></div>
+</section>
+
+<!-- ============ PAUSE MENU ============ -->
+<div id="modal-pause" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h2 id="pause-title">Shift Paused</h2>
+    </div>
+    <div class="modal-body pause-body">
+      <button class="btn btn-primary" data-action="resume-game">Resume Shift</button>
+      <button class="btn btn-secondary" data-action="open-settings-ingame">Terminal Settings</button>
+      <button class="btn btn-ghost btn-danger" data-action="abandon-shift">Abandon Shift</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SHIFT COMPLETE / GAME OVER SCREEN ============ -->
+<section id="debrief-screen" class="screen debrief-screen hidden" aria-label="Shift debrief">
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="debrief-inner">
+    <span class="eyebrow" id="debrief-eyebrow">SHIFT DEBRIEF</span>
+    <h2 class="debrief-title" id="debrief-title">Shift Complete</h2>
+    <p class="debrief-sub" id="debrief-sub">All directives cleared. Facility secure.</p>
+
+    <div class="debrief-stats">
+      <div class="debrief-stat"><span class="ds-label">Final Score</span><span class="ds-value" id="debrief-score">0</span></div>
+      <div class="debrief-stat"><span class="ds-label">Incidents Resolved</span><span class="ds-value" id="debrief-incidents">0</span></div>
+      <div class="debrief-stat"><span class="ds-label">Best Combo</span><span class="ds-value" id="debrief-combo">×1.0</span></div>
+      <div class="debrief-stat"><span class="ds-label">Rank</span><span class="ds-value" id="debrief-rank">—</span></div>
+    </div>
+
+    <div class="debrief-unlocks" id="debrief-unlocks"></div>
+
+    <div class="debrief-actions">
+      <button class="btn btn-ghost" data-action="back-to-menu">Return to Menu</button>
+      <button class="btn btn-primary" data-action="new-shift"><span class="btn-icon">▶</span> Next Shift</button>
+    </div>
+  </div>
+</section>
+
+<script src="overwatch-core.js"></script>
+</body>
+</html>
